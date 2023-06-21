@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case {{case.id}}</title>
+    <style>
+        ul{
+            list-style-type: none;
+        }
+    </style>
+    <script>
+        function send_message(){
+            message = document.getElementById('Message')
+            content = message.innerHTML
+            case_id = document.getElementsByTagName('title')[0].innerHTML.split(' ')[1]
+            console.log(case_id)
+            endpoint = "/send_message/" + case_id
+            fetch(endpoint, {
+                method: "POST",
+                body: JSON.stringify({
+                    Content: content
+                }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+                }).then(()=> location.reload())
+        }
+    </script>
+</head>
+<body>
+    <div style="padding: 5px; border-bottom: solid 1px;">
+        <b>{{case.Comment}} | Status: {{case.Status}}</b>
+    </div>
+    <div style="margin-top: 5px;">
+        {% if current_user.Role=='supervisor' %} 
+        <div style="margin-bottom: 10px;">
+            User: {{case.User_id}} | Verifier: {{case.Verifier_id}}
+        </div>
+        <div style="padding:5px; border-bottom: solid 1px">
+            <div id="Message" contenteditable style="border: solid 1px; margin-bottom: 5px;"></div>
+            <button onclick="send_message()">Send Message</button>
+        </div>
+        {% else %}
+        <div style="padding:5px; border-bottom: solid 1px">
+            <div id="Message" contenteditable style="border: solid 1px; margin-bottom: 5px;"></div>
+            <button onclick="send_message()">Send Message</button>
+        </div>
+        <div style="padding:5px;padding-bottom: 10px; border-bottom: solid 1px;">
+            <b>Upload Documents:</b> <br>
+            <form method=post action="/upload_file/{{case.id}}" enctype=multipart/form-data style="margin-top: 5px;">
+                <input type=file name=file required>
+                <input type=submit value=Upload>
+            </form>
+        </div>
+        {% endif %}
+
+        <div id="Message History">
+            <b>Message History:</b>
+            <ul>
+                {% for message in messages %} 
+                <li style="border-bottom: solid 1px; padding: 5px">
+                    <b>User {{message.Sender_id}}: </b>
+                    <span>{{message.Content|safe}}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="Document History">
+            <b>Document History:</b>
+            <ul>
+                {% for document in documents %} 
+                <li style="border-bottom: solid 1px; padding: 5px">
+                    <b>User {{document.Uploader_id}}: </b>
+                    <a href="/download_file/{{document.id}}">{{document.Filename}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <a href="/">Back</a>
+    </div>
+</body>
+</html>

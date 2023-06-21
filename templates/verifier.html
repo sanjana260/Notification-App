@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Userpage</title>
+</head>
+<body>
+    <div style="padding: 5px;">
+        <b>{{current_user.Username}} | Verifier</b>
+        <p>User ID: {{current_user.id}}</p>
+        <p>Supervisor ID: {{current_user.Verifier_id}}</p>
+    </div>
+    {% for case in cases %}
+    <div style="border:solid 1px; padding: 10px; margin:2px">
+        <p><a href="/case/{{case.id}}">{{case.Comment}}</a> | User: {{case.User_id}}</p>
+        {% if case.Status == 'Pending' %}
+            
+            <a href="/verify_case/{{case.id}}">Verify_case</a>
+        {% elif case.Status == 'Verified' %}
+        <p>Case Verified!</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <a href="/logout">Logout</a>
+</body>
+</html>
