@@ -9,6 +9,8 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail,Message
 import os
 import numpy as np
+import smtplib,ssl
+import pandas as pd
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -80,9 +82,9 @@ def add_user():
             return render_template('add_user.html',message="Username or Email already exists")
 
         # Checking Verifier ID
-        if(Type=="supervisor" and Verifier_id!=-1):
+        if(Type=="supervisor" and Verifier_id!=-1) or (Type =='health_check_team' and Verifier_id!=-1):
             return render_template('add_user.html',message = 'Invalid Verifier ID')
-        elif(Type=="supervisor" and Verifier_id==-1):
+        elif(Type=="supervisor" and Verifier_id==-1) or (Type =='health_check_team' and Verifier_id==-1):
             pass
         else:
             Verifier = User.query.get(Verifier_id)
@@ -132,6 +134,36 @@ def supervisors():
     user_id_list = list(map(lambda x: int(x.id), user_list))
     cases = Cases.query.filter(Cases.User_id.in_(user_id_list)).all()
     return render_template("supervisor.html",cases = cases)
+
+@app.route("/health_check_team",methods = ["GET","POST"])
+@login_required
+def health_check():
+    message = ''
+    if(current_user.Role != "health_check_team"):
+        return redirect('/')
+    if(request.method == 'POST'):
+        file = request.form.get('exception_list')
+        data = pd.read_excel(file)
+        print(data)
+        failure = 0
+        for index,row in data.iterrows():
+            if(row["Raise exception"]=='Yes'):
+                user = User.query.get(row["User ID"])
+                if(user.Role !='user' ):
+                    failure += 1
+                    message+=  'Some entries were not pushed due to invalid User ID'
+                    continue
+                new_case = Cases(Status = 'Pending',Comment = row["Exception Description"],User_id = row["User ID"], Verifier_id = user.Verifier_id)
+                db.session.add(new_case)
+                db.session.commit()
+        success = data.shape[0]- failure
+        if(failure==0):
+            message = "Success! " + str(success) + " entries were pushed"
+        elif(success==0):
+            message = "Operation failed. "+ str(failure)+" entries were not pushed due to invalid User ID"
+        else:
+            message = "Success! " + str(success) + " entries were pushed. " + str(failure) + " entries were not pushed due to invalid User ID."
+    return render_template("health_check_team.html",message = message)
 
 @app.route("/upload_file/<int:case_id>",methods = ["POST"])
 @login_required
@@ -208,3 +240,22 @@ def send_message(case_id):
     db.session.add(new_message)
     db.session.commit()
     return redirect('/case/'+str(case_id))
+
+def send_mail(ids,message):
+    port = 465
+    smtp_server = "smtp.gmail.com"
+    sender_email = "testsender135@gmail.com"
+    receiver_email = ids
+    password = "Password@135"
+    message="""\
+    Subject: Hi there
+
+
+    This message is sent from Python.
+    """
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
+

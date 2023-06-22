@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Check Team</title>
+</head>
+<body>
+    <div>
+        <b>{{current_user.Username}}</b> | Health Check Team
+    </div>
+    <div>
+        <form method="POST">
+            <input type="file" name="exception_list" required accept=".xls,.xlsx,.csv">
+            <input type="submit">
+        </form>
+        <p>{{message}}</p>
+    </div>
+    <div>
+        <a href="/logout">Logout</a>
+    </div>
+</body>
+</html>
