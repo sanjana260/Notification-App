@@ -4,7 +4,6 @@ from application.database import db
 
 app = Flask(__name__)
 
-print(Config)
 app.config.from_object(Config)
 db.init_app(app)
 app.app_context().push()

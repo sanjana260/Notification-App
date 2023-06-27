@@ -1,0 +1,27 @@
+26-Jun-23 17:39:10 - Sanjana1 (user) logged out
+26-Jun-23 17:41:17 - Nikhil (user) logged out
+26-Jun-23 17:41:22 - Nikhil (user) has logged in
+26-Jun-23 17:41:36 - User 4 sent a message (Message ID: 18) regarding case 3
+26-Jun-23 17:41:53 - File Aadhar_Card_2.pdf uploaded regarding case 3 by user 4
+26-Jun-23 17:43:09 - Nikhil (user) logged out
+26-Jun-23 17:44:12 - Health Check 2 (health_check_team) has logged in
+26-Jun-23 17:51:08 - User 8 uploaded case no. 4 with User ID: 4 and Verifier ID: 5.
+26-Jun-23 17:51:08 - User 8 uploaded case no. 5 with User ID: 1 and Verifier ID: 3.
+26-Jun-23 17:51:55 - Health Check 2 (health_check_team) logged out
+26-Jun-23 17:52:49 - New User Test1 has been created with role user
+26-Jun-23 17:53:01 - Test1 (user) has logged in
+26-Jun-23 17:56:13 - Test1 (user : 9) logged out
+26-Jun-23 17:56:26 - Test1 (user : 9) has logged in
+27-Jun-23 11:04:48 - Sanjana1 (user : 1) has logged in
+27-Jun-23 11:41:25 - Sanjana1 (user : 1) logged out
+27-Jun-23 11:41:32 - Trupti (verifier : 5) has logged in
+27-Jun-23 11:51:49 - Case no. 4 verified by verifier 5
+27-Jun-23 12:08:44 - Trupti (verifier : 5) logged out
+27-Jun-23 12:08:50 - Sanjana2 (supervisor : 2) has logged in
+27-Jun-23 12:59:26 - Trupti (verifier : 5) has logged in
+27-Jun-23 14:44:40 - Trupti (verifier : 5) logged out
+27-Jun-23 14:44:47 - Sanjana2 (supervisor : 2) has logged in
+27-Jun-23 14:52:06 - Sanjana2 (supervisor : 2) logged out
+27-Jun-23 14:52:15 - Trupti (verifier : 5) has logged in
+27-Jun-23 15:09:01 - User 5 sent a message (Message ID: 19) regarding case 3
+27-Jun-23 15:09:42 - Case no. 3 rejected by verifier 5

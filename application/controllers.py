@@ -11,6 +11,7 @@ import os
 import numpy as np
 import smtplib,ssl
 import pandas as pd
+import logging
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -19,12 +20,23 @@ bcrypt = Bcrypt(app)
 mail = Mail(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
 dir = os.path.dirname(basedir)
+# logging.basicConfig(level='WARNING', filemode='a', format='%(asctime)s: %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logger = logging.getLogger(__name__)
+handler = logging.FileHandler('test.log')
+formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel('INFO')
 
 ALLOWED_EXTENSIONS = {'pdf'}
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+@app.route("/user2",methods = ['GET'])
+def user2():
+    return render_template('user2.html')
 
 @app.route("/",methods=["Get"])
 @login_required
@@ -46,12 +58,14 @@ def login():
         if not bcrypt.check_password_hash(user.Password,Password):
             return render_template('login.html',message = 'Password incorrect')
         login_user(user)
+        logger.info(f"{current_user.Username} ({current_user.Role} : {current_user.id}) has logged in")
         return redirect("/")
     return render_template('login.html')
 
 @app.route("/logout",methods=["GET"])
 @login_required
 def logout():
+    logger.info(f"{current_user.Username} ({current_user.Role} : {current_user.id}) logged out")
     logout_user()
     return redirect("/login")
 
@@ -97,6 +111,7 @@ def add_user():
         new_user = User(Username = Username, Email = Email, Password = Password,Role=Type,Verifier_id=Verifier_id)
         db.session.add(new_user)
         db.session.commit()
+        logger.info(f"New User {new_user.Username} has been created with role {new_user.Role}")
         return redirect("/login")
     return render_template('add_user.html')
 
@@ -110,7 +125,13 @@ def userpage():
     if(current_user.Role != "user"):
         return redirect("/")
     cases = Cases.query.filter(Cases.User_id == current_user.id).all()
-    return render_template("user.html",cases = cases)
+    verified = len(list(filter(lambda x : x.Status == "Verified",cases)))
+    return render_template("user2.html",cases = cases,verified = verified)
+
+@app.route("/profile",methods = ["GET","POST"])
+@login_required
+def profile():
+    return render_template("profile.html")
 
 @app.route("/verifier",methods = ["GET","POST"])
 @login_required
@@ -120,7 +141,8 @@ def verifiers():
     user_list = User.query.filter(User.Verifier_id==current_user.id).all()
     user_id_list = list(map(lambda x: x.id, user_list))
     cases = Cases.query.filter(Cases.User_id.in_(user_id_list)).all()
-    return render_template("verifier.html",cases = cases)
+    verified = len(list(filter(lambda x : x.Status == "Verified",cases)))
+    return render_template("user2.html",cases = cases, verified = verified)
 
 @app.route("/supervisor",methods = ["GET","POST"])
 @login_required
@@ -133,7 +155,8 @@ def supervisors():
     user_list = User.query.filter(User.Verifier_id.in_(verifier_id_list)).all()
     user_id_list = list(map(lambda x: int(x.id), user_list))
     cases = Cases.query.filter(Cases.User_id.in_(user_id_list)).all()
-    return render_template("supervisor.html",cases = cases)
+    verified = len(list(filter(lambda x : x.Status == "Verified",cases)))
+    return render_template("user2.html",cases = cases,verified = verified)
 
 @app.route("/health_check_team",methods = ["GET","POST"])
 @login_required
@@ -142,20 +165,19 @@ def health_check():
     if(current_user.Role != "health_check_team"):
         return redirect('/')
     if(request.method == 'POST'):
-        file = request.form.get('exception_list')
+        file = request.files['exception_list']
         data = pd.read_excel(file)
-        print(data)
         failure = 0
         for index,row in data.iterrows():
             if(row["Raise exception"]=='Yes'):
                 user = User.query.get(row["User ID"])
                 if(user.Role !='user' ):
                     failure += 1
-                    message+=  'Some entries were not pushed due to invalid User ID'
                     continue
                 new_case = Cases(Status = 'Pending',Comment = row["Exception Description"],User_id = row["User ID"], Verifier_id = user.Verifier_id)
                 db.session.add(new_case)
                 db.session.commit()
+                logger.info(f"User {current_user.id} uploaded case no. {new_case.id} with User ID: {new_case.User_id} and Verifier ID: {new_case.Verifier_id}.")
         success = data.shape[0]- failure
         if(failure==0):
             message = "Success! " + str(success) + " entries were pushed"
@@ -175,8 +197,8 @@ def upload_file(case_id):
     if not case:
         print("Case not found")
         return redirect('/case/'+str(case_id))
-    if (case.Status == 'Verified'):
-        print("Case already verified")
+    if (case.Status != 'Pending'):
+        print("Case already closed")
         return redirect('/case/'+str(case_id))
     if file.filename == '':
         print("No file")
@@ -187,6 +209,7 @@ def upload_file(case_id):
         document = Documents(Filename = filename, Uploader_id = current_user.id,Case_id = case_id)
         db.session.add(document)
         db.session.commit()
+        logger.info(f"File {filename} uploaded regarding case {case_id} by user {current_user.id}")
         return redirect('/case/'+str(case_id))
     return redirect('/case/'+str(case_id))
 
@@ -202,6 +225,22 @@ def verify_case(case_id):
     case.Status = 'Verified'
     db.session.add(case)
     db.session.commit()
+    logger.info(f"Case no. {case_id} verified by verifier {current_user.id}")
+    return redirect('/')
+
+@app.route('/reject_case/<int:case_id>',methods=["GET"])
+@login_required
+def reject_case(case_id):
+    case = Cases.query.get(int(case_id))
+    if not case:
+        print("Case not found")
+        return redirect('/')
+    if not case.Verifier_id == current_user.id:
+        return redirect('/')
+    case.Status = 'Rejected'
+    db.session.add(case)
+    db.session.commit()
+    logger.info(f"Case no. {case_id} rejected by verifier {current_user.id}")
     return redirect('/')
 
 @app.route('/download_file/<int:document_id>',methods = ["GET"])
@@ -213,6 +252,7 @@ def download_file(document_id):
     if(current_user.id not in [case.User_id, case.Verifier_id, verifier.Verifier_id]):
         return redirect('/')
     file_name = document.Filename
+    logger.info(f"User {current_user.id} ({current_user.Role}) downloaded file \"{file_name}\" regarding case {case.id}")
     return send_from_directory(app.config['UPLOAD_FOLDER'],file_name,as_attachment=True)
 
 @app.route('/case/<int:case_id>',methods = ["GET","POST"])
@@ -223,8 +263,10 @@ def case(case_id):
     if(current_user.id not in [case.User_id, case.Verifier_id, verifier.Verifier_id]):
         return redirect('/')
     messages = Messages.query.filter(Messages.Case_id == case_id).all()
+    message_senders = [User.query.get(message.Sender_id) for message in messages]
     documents = Documents.query.filter(Documents.Case_id == case_id).all()
-    return render_template('case.html',case = case,messages = messages,documents = documents)
+    document_senders = [User.query.get(document.Uploader_id) for document in documents]
+    return render_template('case.html',case = case,messages = messages,documents = documents,message_senders=message_senders,document_senders=document_senders)
 
 @app.route('/send_message/<int:case_id>',methods = ["POST"])
 @login_required
@@ -233,12 +275,16 @@ def send_message(case_id):
         return redirect('/login')
     content = request.get_json()["Content"]
     case = Cases.query.get(case_id)
+    if (case.Status != 'Pending'):
+        print("Case already closed")
+        return redirect('/case/'+str(case_id))
     verifier = User.query.get(case.Verifier_id)
     if(current_user.id not in [case.User_id, case.Verifier_id, verifier.Verifier_id]):
         return redirect('/')
     new_message = Messages(Content = content, Sender_id = current_user.id, Case_id = case_id)
     db.session.add(new_message)
     db.session.commit()
+    logger.info(f"User {current_user.id} sent a message (Message ID: {new_message.id}) regarding case {case_id}")
     return redirect('/case/'+str(case_id))
 
 def send_mail(ids,message):
@@ -253,9 +299,10 @@ def send_mail(ids,message):
 
     This message is sent from Python.
     """
-
+    subject = ''
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, message)
+    logger.info(f"Sent mail to users {ids} with Subject {subject}")
 
