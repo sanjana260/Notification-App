@@ -111,7 +111,7 @@ def add_user():
         new_user = User(Username = Username, Email = Email, Password = Password,Role=Type,Verifier_id=Verifier_id)
         db.session.add(new_user)
         db.session.commit()
-        logger.info(f"New User {new_user.Username} has been created with role {new_user.Role}")
+        logger.info(f"New User {new_user.Username} ({new_user.Role} : {new_user.id}) has been created with email {new_user.Email} and supervisor (or verifier) ID {new_user.Verifier_id}")
         return redirect("/login")
     return render_template('add_user.html')
 
@@ -126,7 +126,8 @@ def userpage():
         return redirect("/")
     cases = Cases.query.filter(Cases.User_id == current_user.id).all()
     verified = len(list(filter(lambda x : x.Status == "Verified",cases)))
-    return render_template("user2.html",cases = cases,verified = verified)
+    rejected = len(list(filter(lambda x : x.Status == "Rejected",cases)))
+    return render_template("user2.html",cases = cases,verified = verified,rejected = rejected)
 
 @app.route("/profile",methods = ["GET","POST"])
 @login_required
@@ -142,7 +143,8 @@ def verifiers():
     user_id_list = list(map(lambda x: x.id, user_list))
     cases = Cases.query.filter(Cases.User_id.in_(user_id_list)).all()
     verified = len(list(filter(lambda x : x.Status == "Verified",cases)))
-    return render_template("user2.html",cases = cases, verified = verified)
+    rejected = len(list(filter(lambda x : x.Status == "Rejected",cases)))
+    return render_template("user2.html",cases = cases,verified = verified,rejected = rejected)
 
 @app.route("/supervisor",methods = ["GET","POST"])
 @login_required
@@ -156,7 +158,8 @@ def supervisors():
     user_id_list = list(map(lambda x: int(x.id), user_list))
     cases = Cases.query.filter(Cases.User_id.in_(user_id_list)).all()
     verified = len(list(filter(lambda x : x.Status == "Verified",cases)))
-    return render_template("user2.html",cases = cases,verified = verified)
+    rejected = len(list(filter(lambda x : x.Status == "Rejected",cases)))
+    return render_template("user2.html",cases = cases,verified = verified,rejected = rejected)
 
 @app.route("/health_check_team",methods = ["GET","POST"])
 @login_required

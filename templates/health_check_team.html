@@ -2,22 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Check Team</title>
+    <meta name="viewport" content="width=device-width, initial-scal                                                                                                     e=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/user.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <!-- <link rel="stylesheet" type="text/css" href="https://pixinvent.com/stack-responsive-bootstrap-4-admin-template/app-assets/fonts/simple-line-icons/style.min.css"> -->
+    <!-- <link rel="stylesheet" type="text/css" href="https://pixinvent.com/stack-responsive-bootstrap-4-admin-template/app-assets/css/colors.min.css"> -->
+    <!-- <link r el="stylesheet" type="text/css" href="https://pixinvent.com/stack-responsive-bootstrap-4-admin-template/app-assets/css/bootstrap.min.css"> -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+
+    <!-- For the cases table -->
+    <!-- <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script> -->
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+    <script src="/static/js/user.js"></script>
 </head>
-<body>
-    <div>
-        <b>{{current_user.Username}}</b> | Health Check Team
-    </div>
-    <div>
-        <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="exception_list" required accept=".xls,.xlsx,.csv">
-            <input type="submit">
-        </form>
-        <p>{{message}}</p>
-    </div>
-    <div>
-        <a href="/logout">Logout</a>
-    </div>
+<body id="body-pd">
+        <header class="header" id="header">
+            <div class="header_toggle"> <i class='bx bx-menu' id="header-toggle" style="color: #004c8f;"></i> </div>
+            <div class="header_img">  </div>
+        </header>
+        <div class="l-navbar" id="nav-bar" style="background-color: #004c8f;">
+            <nav class="nav">
+                <div> <a href="#" class="nav_logo"> 
+                    <!-- <i class='bx bx-layer nav_logo-icon'></i>  -->
+                    <!-- <span class="nav_logo-name">{{current_user.Username}}</span> -->
+                    <img src="/static/assets/HDFC_Bank_Logo.svg" alt="HDFC" height="30px"> 
+                </a>
+                    <div class="nav_list"> 
+                        <a href="/user" class="nav_link active"> <i class='bx bx-grid-alt nav_icon'></i> <span class="nav_name">Dashboard</span> </a> 
+                        <a href="/profile" class="nav_link"> <i class='bx bx-user nav_icon'></i> <span class="nav_name">Profile</span> </a> 
+                </div> <a href="/logout" class="nav_link"> <i class='bx bx-log-out nav_icon'></i> <span class="nav_name">Log Out</span> </a>
+            </nav>
+        </div>
+        <!--Container Main start-->
+        <div class="height-100 bg-light">
+            <h4>{{current_user.Username}}</h4>
+            <!-- <label for="Username" class="form-label m-2">Upload File</label> -->
+            <form method="POST" enctype="multipart/form-data" class="input-group">
+                
+                <input name="exception_list" type=file class="form-control" required>
+                <input type="submit" class="btn btn-primary" class="btn btn-outline-secondary" value="Upload">
+            </form>
+            <p class="text-secondary">{{message}}</p>
+        </div>
+        <!--Container Main end-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script></body>
+
 </body>
 </html>
+    

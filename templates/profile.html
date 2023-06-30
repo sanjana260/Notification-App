@@ -41,28 +41,20 @@
         </div>
         <!--Container Main start-->
         <div class="height-100 bg-light">
-            <!-- <p class="h5">User ID: {{current_user.id}}</p>
-            {% if current_user.Role == 'user'%}
-            <p class="h5">Verifier: {{current_user.Verifier_id}}</p>
-            {% endif %}
-            {% if current_user.Role == 'verifier' %} 
-            <p class="h5">Supervisor: {{current_user.Supervisor_id}}</p>
-            {% endif %}
-            <p class="h5">Email: {{current_user.Email}}</p> -->
             <div class="p-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="text-right">Profile</h4>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-md-12"><label class="labels">Username</label><input type="text" disabled class="form-control" placeholder="enter phone number" value="{{current_user.Username}}"></div>
-                    <div class="col-md-12"><label class="labels">User ID</label><input type="text" disabled class="form-control" placeholder="enter address line 1" value="{{current_user.id}}"></div>
+                    <div class="col-md-12"><label class="labels">Username</label><input type="text" class="form-control" placeholder="enter phone number" value="{{current_user.Username}}" readonly></div>
+                    <div class="col-md-12"><label class="labels">User ID</label><input type="text"  class="form-control" placeholder="enter address line 1" value="{{current_user.id}}" readonly></div>
                     {% if current_user.Role == 'user' %}
-                    <div class="col-md-12"><label class="labels">Verifier ID</label><input type="text" disabled class="form-control" placeholder="enter address line 2" value="{{current_user.Verifier_id}}"></div>
+                    <div class="col-md-12"><label class="labels">Verifier ID</label><input type="text" readonly class="form-control" placeholder="enter address line 2" value="{{current_user.Verifier_id}}"></div>
                     {% endif %} 
                     {% if current_user.Role == 'verifier' %}
-                    <div class="col-md-12"><label class="labels">Supervisor</label><input type="text" disabled class="form-control" placeholder="enter address line 2" value="{{current_user.Verifier_id}}"></div>
+                    <div class="col-md-12"><label class="labels">Supervisor</label><input type="text" readonly class="form-control" placeholder="enter address line 2" value="{{current_user.Verifier_id}}"></div>
                     {% endif %}
-                    <div class="col-md-12"><label class="labels">Email</label><input type="text" disabled class="form-control" placeholder="education" value="{{current_user.Email}}"></div>
+                    <div class="col-md-12"><label class="labels">Email</label><input type="text" readonly class="form-control" placeholder="education" value="{{current_user.Email}}"></div>
                 </div>
                 <!-- <div class="mt-5 text-center"><button class="btn btn-primary profile-button" type="button">Save Profile</button></div> -->
             </div>
